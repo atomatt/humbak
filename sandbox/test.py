@@ -7,6 +7,7 @@ import os
 import os.path
 import urlparse
 import urllib
+from xml.etree import ElementTree as etree
 
 
 CONN_FACTORY = {'http': httplib.HTTPConnection,
@@ -33,7 +34,7 @@ class DAV(object):
         content_length = os.path.getsize(filename)
         f = open(filename, 'rb')
         try:
-            request = self._request('PUT', path, [('Content-Length', str(content_length))])
+            request = self.request('PUT', path, [('Content-Length', str(content_length))])
             blocks_sent = 0
             bytes_sent = 0
             start_time = time.time()
@@ -48,31 +49,47 @@ class DAV(object):
                 bandwidth = float(bytes_sent) / (end_time-start_time)
                 print "written: %d of %d (%f bytes/s)" % (bytes_sent, content_length, bandwidth)
             response = request.getresponse()
+            response.read()
             if 400 <= response.status <= 600:
                 response.read()
                 raise Exception(response.status)
-            return response
         finally:
             f.close()
 
     def list_dir(self, path):
         log.debug("DAV.list_dir: %s", path)
-        request = self._request('PROPFIND', path, [('Depth', '1')])
+        path = path.rstrip('/')
+        request = self.request('PROPFIND', path, [('Depth', '1')])
         response = request.getresponse()
-        response.read()
+        data = response.read()
         if 400 <= response.status <= 600:
             raise Exception(response.status)
-        return response
+        doc = etree.fromstring(data)
+        for e in doc.findall('{DAV:}response'):
+            href = e.find('{DAV:}href').text
+            e_path = href[len(os.path.join(self.connargs['path'], path[1:]))+1:]
+            if e_path == '':
+                continue
+            if e.find('{DAV:}propstat/{DAV:}prop/{DAV:}resourcetype/{DAV:}collection') is not None:
+                yield {'path': e_path,
+                       'type': 'dir'}
+            else:
+                yield {'path': e_path,
+                       'type': 'file',
+                       'size': int(e.find('{DAV:}propstat/{DAV:}prop/{DAV:}getcontentlength').text),
+                       'etag': e.find('{DAV:}propstat/{DAV:}prop/{DAV:}getetag').text,
+                       'ctime': e.find('{DAV:}propstat/{DAV:}prop/{DAV:}creationdate').text,
+                       'mtime': e.find('{DAV:}propstat/{DAV:}prop/{DAV:}lastmodifieddate').text}
 
     def mkdir(self, path):
         log.debug("DAV.mkdir: %s", path)
-        request = self._request('MKCOL', path)
+        request = self.request('MKCOL', path)
         response = request.getresponse()
         response.read()
         if 400 <= response.status <= 600:
             raise Exception(response.status)
 
-    def _request(self, method, path, headers=None):
+    def request(self, method, path, headers=None):
         fullpath = os.path.join(self.connargs['path'], path.strip('/'))
         self.conn.putrequest(method, fullpath)
         request = Request(self.conn)
@@ -112,33 +129,52 @@ def parse_url(url):
     return {'scheme': spliturl.scheme,
             'hostname': spliturl.hostname,
             'port': spliturl.port,
-            'path': spliturl.path or '/',
+            'path': spliturl.path.rstrip('/'),
             'username': urllib.unquote(spliturl.username) if spliturl.username else None,
             'password': urllib.unquote(spliturl.password) if spliturl.password else None}
 
 
-def put_dir(dav, filename):
-    log.info('DIR: %s'%(filename,))
-    try:
-        dav.list_dir(filename)
-    except Exception, e:
-        if e.message != 404:
-            raise
-        dav.mkdir(filename)
-    for root, dirs, files in os.walk(filename):
+def put_dir(dav, dir):
+    log.info('DIR: %s'%(dir,))
+    for root, dirs, files in os.walk(dir):
+        try:
+            dir_list = list(dav.list_dir(root))
+        except Exception, e:
+            if e.message != 404:
+                raise
+            mkdir(dav, root)
+            dir_list = list(dav.list_dir(root))
+        info_by_filename = dict((i['path'], i) for i in dir_list)
         for file in files:
-            put_file(dav, os.path.join(root, file))
-        for dir in dirs:
-            put_dir(dav, os.path.join(root, dir))
+            fullfile = os.path.join(root, file)
+            log.info('FILE: %s', fullfile)
+            info = info_by_filename.get(urllib.quote(file))
+            if info:
+                mtime = os.path.getmtime(fullfile)
+                size = os.path.getsize(fullfile)
+                if size == info['size']:
+                    log.info("Skipping file: %s", fullfile)
+                    continue
+            dav.put_file(urllib.quote(fullfile), fullfile)
+
+
+def mkdir(dav, root):
+    root = root.split('/')
+    for i in range(len(root), 0, -1):
+        request = dav.request('HEAD', '/'.join(root[:i]))
+        response = request.getresponse()
+        response.read()
+        if response.status == 200:
+            break
+    i += 1
+    while i <= len(root):
+        dav.mkdir('/'.join(root[:i]))
+        i += 1
 
 
 def put_file(dav, filename):
     log.info('FILE: %s'%(filename,))
-    response = dav.put_file(urllib.quote_plus(filename, safe='/'), filename)
-    response.read()
-    if response.status == 501:
-        print response.status
-        print response.getheaders()
+    dav.put_file(urllib.quote(filename), filename)
 
 
 if __name__ == '__main__':
@@ -148,6 +184,7 @@ if __name__ == '__main__':
     filenames = sys.argv[2:]
     dav = DAV.from_url(url)
     for filename in filenames:
+        filename = os.path.abspath(filename)
         if os.path.isdir(filename):
             put_dir(dav, filename)
         else:
