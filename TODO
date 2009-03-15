@@ -1,0 +1,8 @@
+* Correct up-to-date detection. Only using file size right now. Should use
+  mtime as well. Ideally would use etag.
+* Remove locally deleted files from server
+* Replace clashing files on server, i.e. replace file with directory.
+* Parallel uploads
+* Bandwith contro
+* Timeouts and retries.
+
