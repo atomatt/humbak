@@ -47,7 +47,7 @@ class DAV(object):
             f.close()
 
     def _request(self, method, path, headers=None):
-        fullpath = os.path.join(self.connargs['path'], path)
+        fullpath = os.path.join(self.connargs['path'], path.strip('/'))
         self.conn.putrequest(method, fullpath)
         request = Request(self.conn)
         auth = base64.b64encode(':'.join([self.connargs['username'],
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     dav = DAV.from_url(url)
     for filename in filenames:
         print "Putting", filename, "..."
-        response = dav.put_file(os.path.join('/test', urllib.quote_plus(os.path.basename(filename), safe='/')), filename)
+        response = dav.put_file(urllib.quote_plus(os.path.basename(filename), safe='/'), filename)
         if response.status == 501:
             print response.status
             print response.getheaders()
