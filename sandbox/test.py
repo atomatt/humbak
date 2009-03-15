@@ -41,7 +41,7 @@ class DAV(object):
                 blocks_sent += 1
                 bytes_sent += len(data)
                 bandwidth = float(bytes_sent) / (end_time-start_time)
-                print "written: %d (%f bytes/s)" % (bytes_sent, bandwidth)
+                print "written: %d of %d (%f bytes/s)" % (bytes_sent, content_length, bandwidth)
             return request.getresponse()
         finally:
             f.close()
