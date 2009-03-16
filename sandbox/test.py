@@ -66,7 +66,7 @@ class DAV(object):
             raise Exception(response.status)
         doc = etree.fromstring(data)
         for e in doc.findall('{DAV:}response'):
-            href = e.find('{DAV:}href').text
+            href = urllib.quote(urllib.unquote(e.find('{DAV:}href').text))
             e_path = href[len(os.path.join(self.connargs['path'], path[1:]))+1:]
             if e_path == '':
                 continue
