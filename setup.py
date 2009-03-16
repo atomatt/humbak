@@ -21,6 +21,7 @@ setup(name='humbak',
           # -*- Extra requirements: -*-
       ],
       entry_points="""
-      # -*- Entry points: -*-
+      [console_scripts]
+      humbak = humbak.main:main
       """,
       )
