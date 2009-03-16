@@ -38,6 +38,7 @@ class DAV(object):
             blocks_sent = 0
             bytes_sent = 0
             start_time = time.time()
+            message_clear = ''
             while True:
                 data = f.read(BLOCK_SIZE)
                 if not data:
@@ -47,7 +48,16 @@ class DAV(object):
                 blocks_sent += 1
                 bytes_sent += len(data)
                 bandwidth = float(bytes_sent) / (end_time-start_time)
-                print "written: %d of %d (%f bytes/s)" % (bytes_sent, content_length, bandwidth)
+                if message_clear:
+                    sys.stdout.write(message_clear)
+                message = "written: %d of %d (%d bytes/s)" % (bytes_sent, content_length, bandwidth) 
+                sys.stdout.write(message)
+                extra_chars = len(message_clear)-len(message)
+                if extra_chars > 0:
+                    sys.stdout.write(' '*extra_chars)
+                    sys.stdout.write('\b'*extra_chars)
+                message_clear = "\b"*len(message)
+                sys.stdout.flush()
             response = request.getresponse()
             response.read()
             if 400 <= response.status <= 600:
@@ -155,6 +165,7 @@ def put_dir(dav, dir):
                 if size == info['size']:
                     log.info("Skipping file: %s", fullfile)
                     continue
+            log.info("Sending file: %s", fullfile)
             dav.put_file(urllib.quote(fullfile), fullfile)
 
 
