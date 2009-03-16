@@ -51,7 +51,7 @@ class DAV(object):
                 bandwidth = float(bytes_sent) / (end_time-start_time)
                 if message_clear:
                     sys.stdout.write(message_clear)
-                message = "written: %d of %d (%d bytes/s)" % (bytes_sent, content_length, bandwidth) 
+                message = "%s: %d%% (%d kb/s)" % (filename, 100*bytes_sent/content_length, bandwidth/1024) 
                 sys.stdout.write(message)
                 extra_chars = len(message_clear)-len(message)
                 if extra_chars > 0:
