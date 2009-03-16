@@ -14,6 +14,7 @@ CONN_FACTORY = {'http': httplib.HTTPConnection,
 
 
 BLOCK_SIZE = 1024
+MAX_BANDWIDTH = 1024*22.5
 
 
 log = logging.getLogger(__name__)
@@ -39,6 +40,7 @@ class DAV(object):
             start_time = time.time()
             message_clear = ''
             while True:
+                block_start_time = time.time()
                 data = f.read(BLOCK_SIZE)
                 if not data:
                     break
@@ -57,6 +59,9 @@ class DAV(object):
                     sys.stdout.write('\b'*extra_chars)
                 message_clear = "\b"*len(message)
                 sys.stdout.flush()
+                if bandwidth >= MAX_BANDWIDTH:
+                    if end_time - block_start_time < 1:
+                        time.sleep(1-(end_time-block_start_time))
             response = request.getresponse()
             response.read()
             if 400 <= response.status <= 600:
