@@ -1,9 +1,0 @@
-setup.cfg
-setup.py
-davbak/__init__.py
-davbak.egg-info/PKG-INFO
-davbak.egg-info/SOURCES.txt
-davbak.egg-info/dependency_links.txt
-davbak.egg-info/entry_points.txt
-davbak.egg-info/top_level.txt
-davbak.egg-info/zip-safe

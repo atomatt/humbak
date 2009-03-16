@@ -3,7 +3,7 @@ import sys, os
 
 version = '0.0'
 
-setup(name='davbak',
+setup(name='humbak',
       version=version,
       description="",
       long_description="""\
