@@ -138,12 +138,12 @@ def put_dir(dav, dir):
     log.info('DIR: %s'%(dir,))
     for root, dirs, files in os.walk(dir):
         try:
-            dir_list = list(dav.list_dir(root))
+            dir_list = list(dav.list_dir(urllib.quote(root)))
         except Exception, e:
             if e.message != 404:
                 raise
             mkdir(dav, root)
-            dir_list = list(dav.list_dir(root))
+            dir_list = list(dav.list_dir(urllib.quote(root)))
         info_by_filename = dict((i['path'], i) for i in dir_list)
         for file in files:
             fullfile = os.path.join(root, file)
@@ -161,14 +161,14 @@ def put_dir(dav, dir):
 def mkdir(dav, root):
     root = root.split('/')
     for i in range(len(root), 0, -1):
-        request = dav.request('HEAD', '/'.join(root[:i]))
+        request = dav.request('HEAD', urllib.quote('/'.join(root[:i])))
         response = request.getresponse()
         response.read()
         if response.status == 200:
             break
     i += 1
     while i <= len(root):
-        dav.mkdir('/'.join(root[:i]))
+        dav.mkdir(urllib.quote('/'.join(root[:i])))
         i += 1
 
 
