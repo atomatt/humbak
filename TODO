@@ -3,6 +3,7 @@
 * Remove locally deleted files from server
 * Replace clashing files on server, i.e. replace file with directory.
 * Parallel uploads
-* Bandwith contro
+* Bandwith control
 * Timeouts and retries.
+* Content encoding (gzip for extra speed)
 
