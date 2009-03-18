@@ -38,6 +38,8 @@ class DAV(object):
             blocks_sent = 0
             bytes_sent = 0
             start_time = time.time()
+            sys.stdout.write(filename)
+            sys.stdout.write(': ')
             message_clear = ''
             while True:
                 block_start_time = time.time()
@@ -51,7 +53,7 @@ class DAV(object):
                 bandwidth = float(bytes_sent) / (end_time-start_time)
                 if message_clear:
                     sys.stdout.write(message_clear)
-                message = "%s: %0.1f%% (%.1f kb/s)" % (filename, 100.0*bytes_sent/content_length, bandwidth/1024) 
+                message = "%0.1f%% (%.1f kb/s)" % (100.0*bytes_sent/content_length, bandwidth/1024) 
                 sys.stdout.write(message)
                 extra_chars = len(message_clear)-len(message)
                 if extra_chars > 0:
