@@ -1,9 +1,31 @@
 * Correct up-to-date detection. Only using file size right now. Should use
   mtime as well. Ideally would use etag.
+
 * Remove locally deleted files from server
+
 * Replace clashing files on server, i.e. replace file with directory.
+
 * Parallel uploads
-* Bandwith control
+
+* Bandwith control (crudely done but not configurable).
+
 * Timeouts and retries.
+
 * Content encoding (gzip for extra speed)
+
+* Split DAV into two: a pure DAV HTTP helper, and something with more file
+  system -like API (mkdir, cp, etc).
+
+* Command line options.
+
+* Move bandwidth control to correct place. It shouldn't be part of the DAV
+  protocol, it's higher-level than that.
+
+* Move progress reporting to a higher level. Again, it's embedded in the HTTP
+  code at the moment.
+
+* Consider using one of the simple concurrency libraries. Ideally, one that
+  uses yield would be good to avoid additional dependencies but, so far, I
+  haven't found one with a decent HTTP client ... at least one that supports
+  streaming. eventlet's httpc module is good but eventlet depends on greenlet.
 
