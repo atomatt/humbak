@@ -1,0 +1,51 @@
+Introduction
+============
+
+humbak is a very simple, command line backup tool to upload files to a remote
+humyo.com DAV server. humbak only uploads files it thinks has changed so it's
+relatively effecient.
+
+humbak is pure Python with no additional dependencies so it *should* run on
+just about any OS with Python installed.
+
+
+Usage
+=====
+
+humbak URL FILENAME [FILENAME ...]
+
+Example:
+
+$ humbak https://me%40example.com:mypassword@dav.humyo.com/backups/desktop \
+    /home/matt/Music /home/matt/Photos
+
+will upload everything in /home/matt/Music to /backups/desktop/home/matt/Music
+in the me@example.com DAV account, and and everything in /home/matt/Photos to
+/backups/desktop/home/matt/Photos.
+
+
+Limitations
+===========
+
+Lots for now, see TODO. But I intend to fix that as my needs change.
+
+In fact, please don't use this on anything other than a static directory
+hierarchy. For instance, it's good for a directory full of photos, mp3s, or
+other files that rarely (if ever) change but not a lot else.
+
+
+About the name
+==============
+
+humbak was written after failing to find an existing solution with two key
+requirements:
+
+* Backup my data to humyo.com.  
+* Don't consume all the upstream bandwith so I can still use the internet
+  connection.
+
+The origins of the name are probably fairly obvious and not too exciting.
+However, it seems that humbak is Polish for "humpback whale" so I figured if
+this thing works with other DAV servers then I could just pretend I chose the
+name for amusement value ;-).
+

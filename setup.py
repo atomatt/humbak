@@ -5,7 +5,7 @@ version = '0.0'
 
 setup(name='humbak',
       version=version,
-      description="",
+      description="Simple backup tool for humyo.com, using the DAV API",
       long_description="""\
 """,
       classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
