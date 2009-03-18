@@ -28,7 +28,10 @@ def put_dir(dav, dir):
                     log.info("Skipping file: %s", fullfile)
                     continue
             log.info("Sending file: %s", fullfile)
-            dav.put_file(urllib.quote(fullfile), fullfile)
+            try:
+                dav.put_file(urllib.quote(fullfile), fullfile)
+            except Exception, e:
+                log.warn('Failed to put %s (%s)', fullfile, unicode(e))
 
 
 def mkdir(dav, root):
