@@ -64,6 +64,10 @@ class DAV(object):
                 if bandwidth >= MAX_BANDWIDTH:
                     if end_time - block_start_time < 1:
                         time.sleep(1-(end_time-block_start_time))
+            # Clear the line.
+            sys.stdout.write('\n')
+            sys.stdout.flush()
+            # Read the response and check the status.
             response = request.getresponse()
             response.read()
             if 400 <= response.status <= 600:
