@@ -38,7 +38,7 @@ class DAV(object):
             blocks_sent = 0
             bytes_sent = 0
             start_time = time.time()
-            sys.stdout.write(filename)
+            sys.stdout.write(filename.encode('utf-8'))
             sys.stdout.write(': ')
             message_clear = ''
             while True:
