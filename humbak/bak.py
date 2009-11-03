@@ -40,7 +40,7 @@ def mkdir(dav, root):
     for i in range(len(root), 0, -1):
         request = dav.request('HEAD', urllib.quote('/'.join(root[:i]).encode('utf-8')))
         response = request.getresponse()
-        response.read()
+        response.close()
         if response.status == 200:
             break
     i += 1
